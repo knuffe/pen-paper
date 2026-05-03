@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+
+/* =========================
+   🎨 MODERN UI LAYER (NO LOGIC CHANGES)
+   ========================= */
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6fb;
+  color: #111;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Headings */
+h1, h2 {
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 6px;
+  margin-top: 20px;
+}
+
+/* Inputs */
+input, select {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: #fff;
+  transition: 0.2s;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+}
+
+/* Cards for sections (purely visual) */
+.card, 
+#attributes, 
+#selections {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  margin-bottom: 15px;
+}
+
+/* Tables */
+table {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th {
+  background: #e5e7eb;
+}
+
+td, th {
+  border: 1px solid #ddd;
+  padding: 6px;
+}
+
+/* Dice button polish (only visual) */
+button {
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+/* =========================
+   🌙 DARK MODE (TOGGLE via body.dark)
+   ========================= */
+
+body.dark {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+/* Cards dark */
+body.dark .card,
+body.dark #attributes,
+body.dark #selections {
+  background: #1e293b;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+}
+
+/* Inputs dark */
+body.dark input,
+body.dark select {
+  background: #0b1220;
+  color: #e5e7eb;
+  border: 1px solid #334155;
+}
+
+/* Table dark */
+body.dark table {
+  background: #1e293b;
+}
+
+body.dark th {
+  background: #334155;
+}
+
+body.dark td, 
+body.dark th {
+  border: 1px solid #334155;
+}
+
+/* Headings dark */
+body.dark h1,
+body.dark h2 {
+  border-bottom: 2px solid #334155;
+}
+ 
+@media print {
+
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  button {
+    display: none !important;
+  }
+
+}
+
+.small-text {
+  font-size: 12px;
+}
+
+</style>
+  <title>Charakter Generator</title>
+  <meta charset="UTF-8">
+</head>
+
+<body>
+
+<h1>Charakter erstellen</h1>
+
+<div style="display:flex; gap:20px; align-items:center;">
+  <div>
+    <label>Name:</label>
+    <input type="text" id="name">
+  </div>
+
+  <div>
+    <label>Stufe (1-7):</label>
+    <input type="number" id="stufe" min="1" max="7" value="1">
+  </div>
+</div>
+
+<!-- 🎲 Würfel -->
+<div style="position:absolute; top:20px; right:20px; text-align:right;">
+<button onclick="rollDice()" style="
+  font-size: 28px;
+  padding: 18px 35px;
+  border-radius: 12px;
+  background: #222;
+  color: white;
+  border: 2px solid #555;
+  cursor: pointer;
+  transition: 0.2s;
+">
+  🎲 Würfeln
+</button>
+  <p id="diceResult"></p>
+</div>
+
+<h2>Auswahl</h2>
+<div id="selections"></div>
+
+<h2>Attribute</h2>
+<div id="attributes"></div>
+
+<h2>Kampfwerte</h2>
+<p>Initiative: <span id="initiativePreview"></span></p>
+<p>Leben: <span id="lifePreview"></span></p>
+<p>Gnade: <span id="gracePreview"></span></p>
+<p>Gabe: <span id="giftPreview"></span></p>
+
+<p>
+
+
+
+
+<b>Kampfgeist:</b><br>
+Offensiv:
+<input type="number" id="offensive" value="0">
+Defensiv:
+<input type="number" id="defensive" value="0">
+<span id="combatStatus"></span>
+</p>
+
+<p>
+Affinität: <span id="affinityPreview"></span>
+<span id="affinityStatus" style="margin-left:10px;font-size:22px;"></span>
+</p>
+
+
+
+<p>
+Begabung Leere:
+<input type="number" id="talent_void" value="0" style="width:60px;">
+</p>
+
+<p>
+Begabung Feuer:
+<input type="number" id="talent_fire" value="0" style="width:60px;">
+</p>
+
+<p>
+Begabung Erde:
+<input type="number" id="talent_earth" value="0" style="width:60px;">
+</p>
+
+<p>
+Begabung Wasser:
+<input type="number" id="talent_water" value="0" style="width:60px;">
+</p>
+
+<p>
+Begabung Luft:
+<input type="number" id="talent_air" value="0" style="width:60px;">
+</p>
+
+<h2>Widerstand</h2>
+<p>
+Verfügbar: <span id="resistancePreview"></span>
+<span id="resistanceStatus" style="margin-left:10px;font-size:22px;"></span>
+</p>
+
+<p>🔥 Feuer:
+<input type="number" id="res_fire" value="0" style="width:60px;">
+</p>
+
+<p>🪨 Erde:
+<input type="number" id="res_earth" value="0" style="width:60px;">
+</p>
+
+<p>💧 Wasser:
+<input type="number" id="res_water" value="0" style="width:60px;">
+</p>
+
+<p>🌪️ Luft:
+<input type="number" id="res_air" value="0" style="width:60px;">
+</p>
+
+
+<h2>Talente</h2>
+<p>
+Körperliche: 
+<span id="talent_body"></span>
+<span id="bodyStatus" style="margin-left:10px;"></span>
+</p>
+
+<p>
+Intellektuelle: 
+<span id="talent_intellect"></span>
+<span id="intStatus" style="margin-left:10px;"></span>
+</p>
+
+<p>
+Gesellschaftliche: 
+<span id="talent_social"></span>
+<span id="socStatus" style="margin-left:10px;"></span>
+</p>
+
+<p>
+Überleben: 
+<span id="talent_survival"></span>
+<span id="survStatus" style="margin-left:10px;"></span>
+</p>
+
+<p>
+Handwerk & Kunst: 
+<span id="talent_craft"></span>
+<span id="craftStatus" style="margin-left:10px;"></span>
+</p>
+
+
+
+
+<h2>Talente</h2>
+
+<table border="1"
+  style="
+    border-collapse: collapse;
+    text-align: center;
+    width: 100%;
+    table-layout: fixed;
+  ">
+
+  <!-- 1. Zeile -->
+  <tr>
+    <th colspan="10">Talente</th>
+  </tr>
+
+  <!-- 2. Zeile -->
+  <tr>
+    <th colspan="2">Körperlich</th>
+    <th colspan="2">Intellektuell</th>
+    <th colspan="2">Gesellschaftlich</th>
+    <th colspan="2">Überleben</th>
+    <th colspan="2">Handwerk & Kunst</th>
+  </tr>
+
+  <!-- Zeilen 3–12 -->
+  <tr>
+    <td id="body_1">Schwimmen</td><td id="body_1b" contenteditable="true"></td>
+    <td id="int_1">Gabenkunde</td><td id="int_1b" contenteditable="true"></td>
+    <td id="soc_1">Überreden</td><td id="soc_1b" contenteditable="true"></td>
+    <td id="surv_1">Schießen</td><td id="surv_1b" contenteditable="true"></td>
+    <td id="craft_1">Konstruieren Holz</td><td id="craft_1b" contenteditable="true"></td>
+  </tr>
+
+  <tr>
+    <td id="body_2">Waffenloser Kampf</td><td id="body_2b" contenteditable="true"></td>
+    <td id="int_2">Sprachen</td><td id="int_2b" contenteditable="true"></td>
+    <td id="soc_2">Beruhigen / Provozieren</td><td id="soc_2b" contenteditable="true"></td>
+    <td id="surv_2">Gefahren entdecken</td><td id="surv_2b" contenteditable="true"></td>
+    <td id="craft_2">Konstruieren Metall</td><td id="craft_2b" contenteditable="true"></td>
+  </tr>
+
+  <tr>
+    <td id="body_3">Klettern</td><td id="body_3b" contenteditable="true"></td>
+    <td id="int_3">Geschichte</td><td id="int_3b" contenteditable="true"></td>
+    <td id="soc_3">Feilschen / Handeln</td><td id="soc_3b" contenteditable="true"></td>
+    <td id="surv_3">Flora & Fauna</td><td id="surv_3b" contenteditable="true"></td>
+    <td id="craft_3">Schmieden</td><td id="craft_3b" contenteditable="true"></td>
+  </tr>
+
+  <tr>
+    <td id="body_4">Sprinten</td><td id="body_4b" contenteditable="true"></td>
+    <td id="int_4">med. Wissen</td><td id="int_4b" contenteditable="true"></td>
+    <td id="soc_4">Motivieren</td><td id="soc_4b" contenteditable="true"></td>
+    <td id="surv_4">Orientieren</td><td id="surv_4b" contenteditable="true"></td>
+    <td id="craft_4">Singen & Dichten</td><td id="craft_4b" contenteditable="true"></td>
+  </tr>
+
+  <tr>
+    <td id="body_5">Balance</td><td id="body_5b" contenteditable="true"></td>
+    <td id="int_5">techn. Wissen</td><td id="int_5b" contenteditable="true"></td>
+    <td id="soc_5">Lügen</td><td id="soc_5b" contenteditable="true"></td>
+    <td id="surv_5">Verstecken</td><td id="surv_5b" contenteditable="true"></td>
+    <td id="craft_5">Verkleiden</td><td id="craft_5b" contenteditable="true"></td>
+  </tr>
+
+  <tr>
+    <td id="body_6">Waffen Kampf</td><td id="body_6b" contenteditable="true"></td>
+    <td id="int_6">Alchemie</td><td id="int_6b" contenteditable="true"></td>
+    <td id="soc_6" class="small-text">Einschüchtern</td><td id="soc_6b" contenteditable="true"></td>
+    <td id="surv_6">Fährtenlesen</td><td id="surv_6b" contenteditable="true"></td>
+    <td id="craft_6">Kochen</td><td id="craft_6b" contenteditable="true"></td>
+  </tr>
+
+  <tr>
+    <td id="body_7">Reiten</td><td id="body_7b" contenteditable="true"></td>
+    <td id="int_7">Geographie</td><td id="int_7b" contenteditable="true"></td>
+    <td id="soc_7">Zechen</td><td id="soc_7b" contenteditable="true"></td>
+    <td id="surv_7">Schlösser knacken</td><td id="surv_7b" contenteditable="true"></td>
+    <td id="craft_7" class="small-text">Stoff- & Leder- verarbeitung</td><td id="craft_7b" contenteditable="true"></td>
+  </tr>
+
+  <tr>
+    <td id="body_8">Kraftakt</td><td id="body_8b" contenteditable="true"></td>
+    <td id="int_8" class="small-text">Straßenwissen</td><td id="int_8b" contenteditable="true"></td>
+    <td id="soc_8">Betören</td><td id="soc_8b" contenteditable="true"></td>
+    <td id="surv_8">Gaukeln</td><td id="surv_8b" contenteditable="true"></td>
+    <td id="craft_8">Malen</td><td id="craft_8b" contenteditable="true"></td>
+  </tr>
+
+  <tr>
+    <td id="body_9">Werfen</td><td id="body_9b" contenteditable="true"></td>
+    <td id="int_9">gesell. Wissen</td><td id="int_9b" contenteditable="true"></td>
+    <td id="soc_9" class="small-text">Wahrnehmung</td><td id="soc_9b" contenteditable="true"></td>
+    <td id="surv_9">Fallenstellen</td><td id="surv_9b" contenteditable="true"></td>
+    <td id="craft_9">Angeln</td><td id="craft_9b" contenteditable="true"></td>
+  </tr>
+
+  <tr>
+    <td id="body_10">Schleichen</td><td id="body_10b" contenteditable="true"></td>
+    <td id="int_10">Seefahrt</td><td id="int_10b" contenteditable="true"></td>
+    <td id="soc_10" >Menschen- kenntnis</td><td id="soc_10b" contenteditable="true"></td>
+    <td id="surv_10">Angeln</td><td id="surv_10b" contenteditable="true"></td>
+    <td id="craft_10">Musik & Tanz</td><td id="craft_10b" contenteditable="true"></td>
+  </tr>
+
+</table>
+
+<div style="display:flex; gap:40px; margin-top:20px;">
+
+  <div>
+    <label><b>Waffenloser Kampf</b></label><br>
+    <input type="number" id="manual_unarmed" value="0" style="width:100px;">
+  </div>
+
+  <div>
+    <label><b>Waffen Kampf</b></label><br>
+    <input type="number" id="manual_weapon" value="0" style="width:100px;">
+  </div>
+
+</div>
+
+
+<div style="margin-top:20px;">
+
+  <div>
+    <b>Parade Faust</b><br>
+
+    Wert:
+    <input type="number" id="parade_faust" readonly style="width:80px;">
+
+    Bonus:
+    <input type="number" id="parade_faust_bonus" value="0" style="width:80px;">
+
+    Gesamt:
+    <input type="number" id="parade_faust_total" readonly style="width:80px;">
+  </div>
+
+</div>
+
+<div style="margin-top:10px;">
+
+  <b>Parade Waffe</b><br>
+
+  Wert:
+  <input type="number" id="parade_weapon" readonly style="width:80px;">
+
+  Bonus:
+  <input type="number" id="parade_weapon_bonus" value="0" style="width:80px;">
+
+  Gesamt:
+  <input type="number" id="parade_weapon_total" readonly style="width:80px;">
+
+</div>
+
+<div style="margin-top:10px;">
+
+  <b>Ausweichen</b><br>
+
+  Wert:
+  <input type="number" id="dodge_base" readonly style="width:80px;">
+
+  Bonus:
+  <input type="number" id="dodge_bonus" value="0" style="width:80px;">
+
+  Gesamt:
+  <input type="number" id="dodge_total" readonly style="width:80px;">
+
+</div>
+
+<div style="margin-top:20px;">
+
+  <label>
+    <input type="checkbox" id="has_shield">
+    <b>Schild?</b>
+  </label>
+
+</div>
+
+<div id="block_section" style="display:none; margin-top:10px;">
+
+  <b>Blocken</b><br>
+
+  Wert:
+  <input type="number" id="block_base" readonly style="width:80px;">
+
+  Bonus:
+  <input type="number" id="block_bonus" value="0" style="width:80px;">
+
+  Gesamt:
+  <input type="number" id="block_total" readonly style="width:80px;">
+
+</div>
+
+<div style="margin-top:40px; text-align:center;">
+  <button onclick="exportPDF()" style="
+    padding: 12px 20px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background: #3b82f6;
+    color: white;
+  ">
+    📄 Als PDF speichern
+  </button>
+</div>
+
+<script>
+
+// ================= CONFIG =================
+const config = {
+  attributes: ["Kraft","Intelligenz","Charisma","Geschick","Muße","Gunst"],
+  selections: {
+    Volk: ["Ata'Kin","Druuden","Erdlinge","Majin","Menschen","Nebelzwerge","Nord","Pyremehen","Scutun","Urrh","Verbannte"],
+    Klasse: ["Nihilar","Schürer","Quellhüter","Erdwächter","Mistral","Illusionist","Dryya","Wüstenläufer","Kessler","Former","Himmelsweber","Tremoryth","Caldera","Schmelzer","Sylphir","Aurist","Kaltblut"],
+    Beruf: ["Künsterler","Militär","Handwerker","Landstreicher","Lehrender","Landwirt","Wissenschaftler","Schurke","Händler","Bürokrat"]
+  },
+  elementsByRace: {
+    "Ata'Kin": ["🌪️","💧","🪨","🕳️"],
+    "Druuden": ["🔥","💧","🪨","🕳️"],
+    "Erdlinge": ["🔥","🪨","🕳️"],
+    "Majin": ["🌪️","💧","🪨","🕳️"],
+    "Menschen": ["🔥","🌪️","💧","🕳️"],
+    "Nebelzwerge": ["🔥","🌪️","💧","🕳️"],
+    "Nord": ["🔥","🌪️","💧","🕳️"],
+    "Pyremehen": ["🔥","🪨","🕳️"],
+    "Scutun": ["🌪️","💧","🪨","🕳️"],
+    "Urrh": ["🔥","🌪️","🕳️"],
+    "Verbannte": ["🔥","🌪️","🪨","🕳️"]
+  },
+  elementsByClass: {
+    "Nihilar": ["🕳️"],
+    "Schürer": ["🔥"],
+    "Quellhüter": ["💧"],
+    "Erdwächter": ["🪨"],
+    "Mistral": ["🌪️"],
+    "Illusionist": ["🔥","🌪️"],
+    "Dryya": ["💧","🪨"],
+    "Wüstenläufer": ["🪨","🌪️"],
+    "Kessler": ["🔥","💧"],
+    "Former": ["💧","🪨"],
+    "Himmelsweber": ["🔥","💧"],
+    "Tremoryth": ["🪨","🌪️"],
+    "Caldera": ["🔥","🪨"],
+    "Schmelzer": ["🔥","🪨"],
+    "Sylphir": ["🌪️","💧"],
+    "Aurist": ["🔥","🌪️"],
+    "Kaltblut": ["🌪️","💧"]
+  },
+elementToTalent: {
+  "🔥": "talent_fire",
+  "🪨": "talent_earth",
+  "💧": "talent_water",
+  "🌪️": "talent_air",
+  "🕳️": "talent_void"
+}
+};
+
+// ================= HELPERS =================
+function val(id){ return +document.getElementById(id).value || 0; }
+function sel(id){ return document.getElementById(id).value || ""; }
+function resetAllTalents() {
+
+  const all = [
+    "talent_fire",
+    "talent_earth",
+    "talent_water",
+    "talent_air",
+    "talent_void"
+  ];
+
+  all.forEach(id => {
+    const el = document.getElementById(id);
+
+    if (!el.disabled) {
+      el.value = 0;
+    }
+  });
+
+}
+
+function getUnarmedValue() {
+  return val("manual_unarmed");
+}
+
+function getWeaponValue() {
+  return val("manual_weapon");
+}
+
+function getTalentValueByName(name) {
+
+  for (let i = 1; i <= 10; i++) {
+
+    const body = document.getElementById(`body_${i}`);
+    const int = document.getElementById(`int_${i}`);
+    const soc = document.getElementById(`soc_${i}`);
+    const surv = document.getElementById(`surv_${i}`);
+    const craft = document.getElementById(`craft_${i}`);
+
+    const check = (el) => el && el.innerText.trim() === name;
+
+    if (check(body)) return Number(document.getElementById(`body_${i}b`).innerText) || 0;
+    if (check(int)) return Number(document.getElementById(`int_${i}b`).innerText) || 0;
+    if (check(soc)) return Number(document.getElementById(`soc_${i}b`).innerText) || 0;
+    if (check(surv)) return Number(document.getElementById(`surv_${i}b`).innerText) || 0;
+    if (check(craft)) return Number(document.getElementById(`craft_${i}b`).innerText) || 0;
+  }
+
+  return 0;
+}
+
+function findSkillRow(skillName) {
+
+  const cats = ["body", "int", "soc", "surv", "craft"];
+
+  for (let i = 1; i <= 10; i++) {
+    for (const cat of cats) {
+
+      const nameCell = document.getElementById(`${cat}_${i}`);
+
+      if (nameCell && nameCell.innerText.trim() === skillName) {
+        return { cat, i };
+      }
+    }
+  }
+
+  return null;
+}
+
+function getSkillValue(skillName) {
+
+  const pos = findSkillRow(skillName);
+
+  if (!pos) return 0;
+
+  const valueCell = document.getElementById(`${pos.cat}_${pos.i}b`);
+
+  return Number(valueCell?.innerText) || 0;
+}
+
+// ================= INIT UI =================
+const attrDiv = document.getElementById("attributes");
+config.attributes.forEach(a=>{
+  const i=document.createElement("input");
+  i.type="number"; i.id="attr_"+a; i.value=0;
+  i.addEventListener("input", updateAll);
+  attrDiv.append(a+": ", i, document.createElement("br"));
+});
+
+const selDiv=document.getElementById("selections");
+
+Object.keys(config.selections).forEach(key=>{
+  const wrapper = document.createElement("div");
+
+  const label = document.createElement("label");
+  label.innerText = key + ": ";
+
+  const s=document.createElement("select"); 
+  s.id="sel_"+key;
+
+  const e=document.createElement("option"); 
+  e.value=""; 
+  e.text="— auswählen —";
+  s.appendChild(e);
+
+  config.selections[key].forEach(v=>{
+    const o=document.createElement("option");
+    o.value=v; 
+    o.text=v;
+    s.appendChild(o);
+  });
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(s);
+
+  // 👇 Volk Icons
+  if(key==="Volk"){
+    const span=document.createElement("span");
+    span.id="icons_Volk";
+    span.style.marginLeft="10px";
+    wrapper.appendChild(span);
+  }
+
+  // 👇 Klasse Icons + Status
+  if(key==="Klasse"){
+    const span=document.createElement("span");
+    span.id="icons_Klasse";
+    span.style.marginLeft="10px";
+    wrapper.appendChild(span);
+
+    const status=document.createElement("span");
+    status.id="status";
+    status.style.marginLeft="10px";
+    wrapper.appendChild(status);
+  }
+
+  s.addEventListener("change", updateAll);
+
+  selDiv.appendChild(wrapper);
+});
+
+// ================= BERECHNUNG =================
+function initiative(){
+  return Math.ceil(30 + val("attr_Kraft")/2 - val("attr_Intelligenz")/2 - val("attr_Geschick")/2);
+}
+
+function life(){
+  return Math.ceil(10 + val("attr_Kraft")*2 + val("attr_Geschick")/2 + (val("stufe")-1)*(val("attr_Kraft")+val("attr_Geschick")));
+}
+
+function grace(){
+  return Math.ceil(20 + val("attr_Gunst")/2 + val("attr_Muße")*2 + (sel("sel_Beruf")==="Landstreicher"?5:0));
+}
+
+function gift(){
+  return Math.ceil(val("attr_Gunst")/2 + val("stufe") + ((sel("sel_Beruf")==="Militär"||sel("sel_Beruf")==="Wissenschaftler")?1:0) + 5);
+}
+
+// ================= TALENTE =================
+function calcTalents() {
+
+  const kraft = val("attr_Kraft");
+  const geschick = val("attr_Geschick");
+  const intelligenz = val("attr_Intelligenz");
+  const muse = val("attr_Muße");
+  const charisma = val("attr_Charisma");
+  const beruf = sel("sel_Beruf");
+
+  let body = (kraft * 6 + geschick * 4) / 2;
+  if (beruf === "Militär") body += 10;
+  if (["Handwerker","Landstreicher","Landwirt","Bürokrat"].includes(beruf)) body += 5;
+
+  let intellect = (intelligenz * 6 + muse * 4) / 2;
+  if (beruf === "Lehrender") intellect += 10;
+  if (["Künsterler","Wissenschaftler","Händler"].includes(beruf)) intellect += 5;
+
+  let social = (charisma * 6 + kraft * 4) / 2;
+  if (beruf === "Bürokrat") social += 10;
+  if (["Schurke","Landwirt","Händler","Lehrender"].includes(beruf)) social += 5;
+
+  let survival = (geschick * 6 + intelligenz * 4) / 2;
+  if (beruf === "Schurke") survival += 10;
+  if (["Wissenschaftler","Landstreicher","Landwirt"].includes(beruf)) survival += 5;
+
+  let craft = (muse * 6 + charisma * 4) / 2;
+  if (["Handwerker","Künsterler"].includes(beruf)) craft += 10;
+  if (beruf === "Händler") craft += 5;
+
+  // 🔥 Werte runden
+  body = Math.round(body);
+  intellect = Math.round(intellect);
+  social = Math.round(social);
+  survival = Math.round(survival);
+  craft = Math.round(craft);
+
+  // 🔥 Anzeigen + BASE speichern (WICHTIG!)
+  document.getElementById("talent_body").innerText = body;
+  document.getElementById("talent_body").dataset.base = body;
+
+  document.getElementById("talent_intellect").innerText = intellect;
+  document.getElementById("talent_intellect").dataset.base = intellect;
+
+  document.getElementById("talent_social").innerText = social;
+  document.getElementById("talent_social").dataset.base = social;
+
+  document.getElementById("talent_survival").innerText = survival;
+  document.getElementById("talent_survival").dataset.base = survival;
+
+  document.getElementById("talent_craft").innerText = craft;
+  document.getElementById("talent_craft").dataset.base = craft;
+}
+
+function calcAffinity() {
+
+  const gabe = gift();
+
+  const fire = val("talent_fire");
+  const earth = val("talent_earth");
+  const water = val("talent_water");
+  const air = val("talent_air");
+  const voidVal = val("talent_void");
+
+  const values = [fire, earth, water, air, voidVal];
+  const sum = fire + earth + water + air + voidVal;
+
+  const preview = document.getElementById("affinityPreview");
+  const status = document.getElementById("affinityStatus");
+
+  // Anzeige: verteilt / Gabe
+  preview.innerText = `${sum} / ${gabe}`;
+
+  // ❌ zu viel verteilt
+  if (sum > gabe) {
+    status.innerHTML = `<span style="color:red;">❌</span>`;
+    return;
+  }
+
+  // ❌ keine Begabung darf mehr als doppelt so hoch sein wie eine andere
+  for (let i = 0; i < values.length; i++) {
+    for (let j = 0; j < values.length; j++) {
+      if (i === j) continue;
+
+      if (values[j] !== 0 && values[i] > values[j] * 2) {
+        status.innerHTML = `<span style="color:red;">❌</span>`;
+        return;
+      }
+    }
+  }
+
+  // ✔ / ❓
+  status.innerHTML =
+    (sum === gabe)
+      ? `<span style="color:green;">✔</span>`
+      : `<span style="color:black;">❓</span>`;
+}
+
+function calcParadeFaust() {
+
+  const base = Math.ceil(val("manual_unarmed") / 3);
+  const bonus = val("parade_faust_bonus");
+  const total = base + bonus;
+
+  document.getElementById("parade_faust").value = base;
+  document.getElementById("parade_faust_total").value = total;
+}
+
+function calcParadeWeapon() {
+
+  const base = Math.floor((val("manual_weapon") / 2) - 1);
+  const bonus = val("parade_weapon_bonus");
+  const total = base + bonus;
+
+  document.getElementById("parade_weapon").value = base;
+  document.getElementById("parade_weapon_total").value = total;
+}
+
+function calcDodge() {
+
+  const geschick = val("attr_Geschick");
+  const intelligenz = val("attr_Intelligenz");
+
+  const base = Math.ceil((geschick / 2) + (intelligenz / 3)) - 2;
+  const bonus = val("dodge_bonus");
+  const total = base + bonus;
+
+  document.getElementById("dodge_base").value = base;
+  document.getElementById("dodge_total").value = total;
+}
+
+function calcBlock() {
+
+  const hasShield = document.getElementById("has_shield").checked;
+
+  // 🔥 OPTIONALER RESET (GENAU HIER!)
+  if (!hasShield) {
+    document.getElementById("block_bonus").value = 0;
+    document.getElementById("block_base").value = "";
+    document.getElementById("block_total").value = "";
+    return;
+  }
+
+  const base = val("parade_weapon") * 2;
+  const bonus = val("block_bonus");
+  const total = base + bonus;
+
+  document.getElementById("block_base").value = base;
+  document.getElementById("block_total").value = total;
+}
+
+function updateShieldUI() {
+
+  const hasShield = document.getElementById("has_shield").checked;
+  const section = document.getElementById("block_section");
+
+  section.style.display = hasShield ? "block" : "none";
+}
+
+function calcResistance() {
+
+  const gabe = gift();
+
+ const fire = val("res_fire");
+ const earth = val("res_earth");
+ const water = val("res_water");
+ const air = val("res_air");
+
+  const values = [fire, earth, water, air];
+
+  const preview = document.getElementById("resistancePreview");
+  const status = document.getElementById("resistanceStatus");
+
+  // =========================
+  // Kostenberechnung (triangular cost)
+  // =========================
+  function cost(n) {
+    return (n * (n + 1)) / 2;
+  }
+
+  const totalCost =
+    cost(fire) +
+    cost(earth) +
+    cost(water) +
+    cost(air);
+
+  // Anzeige
+  preview.innerText = `${totalCost} / ${gabe}`;
+
+  // ❌ zu teuer
+  if (totalCost > gabe) {
+    status.innerHTML = `<span style="color:red;">❌</span>`;
+    return;
+  }
+
+  // ❌ Verhältnisregel (wie bei Affinität optional beibehalten)
+  for (let i = 0; i < values.length; i++) {
+    for (let j = 0; j < values.length; j++) {
+      if (i === j) continue;
+
+      if (values[j] !== 0 && values[i] > values[j] * 2) {
+        status.innerHTML = `<span style="color:red;">❌</span>`;
+        return;
+      }
+    }
+  }
+
+  // ✔ / ❓
+  status.innerHTML =
+    (totalCost === gabe)
+      ? `<span style="color:green;">✔</span>`
+      : `<span style="color:black;">❓</span>`;
+}
+
+
+// =========================
+// 🔁 LIVE LISTENER SETUP
+// =========================
+function initTalentInputs() {
+
+  const prefixes = ["body","int","soc","surv","craft"];
+
+  prefixes.forEach(prefix => {
+    for (let i = 1; i <= 10; i++) {
+
+      const el = document.getElementById(`${prefix}_${i}b`);
+      if (!el) continue;
+
+      el.addEventListener("input", updateAllCategoryStatuses);
+    }
+  });
+}
+
+function transformValue(v) {
+
+  if (v <= 10) return v;
+
+  const map = {
+    11: 12,
+    12: 14,
+    13: 16,
+    14: 18,
+    15: 20,
+    16: 23,
+    17: 26,
+    18: 28,
+    19: 31,
+    20: 35
+  };
+
+  return map[v] || 0;
+}
+
+function calcCategorySum(prefix) {
+  let sum = 0;
+
+  for (let i = 1; i <= 10; i++) {
+    const el = document.getElementById(`${prefix}_${i}b`);
+    if (!el) continue;
+
+    const raw = parseInt(el.innerText) || 0;
+    sum += transformValue(raw);
+  }
+
+  return sum;
+}
+
+function updateCategoryStatus(prefix, talentId, statusId) {
+
+  const talentEl = document.getElementById(talentId);
+
+  const max = Number(talentEl.dataset.base) || 0;
+  const current = calcCategorySum(prefix);
+
+  const status = document.getElementById(statusId);
+
+  // Anzeige setzen
+  talentEl.innerText = `${current} / ${max}`;
+
+  if (current > max) {
+    status.innerHTML = "❌";
+  }
+  else if (current === max) {
+    status.innerHTML = "✔";
+  }
+  else {
+    status.innerHTML = "❓";
+  }
+}
+
+[
+  "manual_unarmed",
+  "parade_faust_bonus",
+  "manual_weapon",
+  "parade_weapon_bonus",
+  "dodge_bonus",
+  "has_shield",
+  "block_bonus"
+].forEach(id => {
+  document.getElementById(id).addEventListener("input", updateAll);
+});
+
+// =========================
+// 🚀 EINBAU IN DEIN SYSTEM
+// =========================
+
+// 1. Beim Start aktivieren
+
+
+window.addEventListener("load", () => {
+  initTalentInputs();
+  updateAll();
+});
+
+for (let i = 1; i <= 10; i++) {
+  const el = document.getElementById(`body_${i}b`);
+  if (!el) continue;
+
+  el.addEventListener("input", () => {
+    updateAllCategoryStatuses();
+  });
+}
+
+// 2. OPTIONAL: falls du ein globales updateAll hast
+// einfach diese Zeile dort ergänzen:
+function hookTalentUpdateIntoMainUpdate() {
+  updateTalentTable();
+}
+
+
+
+// ================= UPDATE =================
+function updateAll(){
+
+  updateIcons();
+  updateTalentAvailability();
+
+  calcAffinity();
+  calcResistance();
+
+  calcTalents();
+  updateCombatSpirit();
+
+  updateAllCategoryStatuses(); // 🔥 NEU
+  calcParadeFaust();
+  calcParadeWeapon();
+  calcDodge();
+  updateShieldUI();
+  calcBlock();
+  document.getElementById("initiativePreview").innerText = initiative();
+  document.getElementById("lifePreview").innerText = life();
+  document.getElementById("gracePreview").innerText = grace();
+  document.getElementById("giftPreview").innerText = gift();
+}
+
+
+document.getElementById("stufe").addEventListener("input", updateAll);
+document.getElementById("offensive").addEventListener("input", updateAll);
+document.getElementById("defensive").addEventListener("input", updateAll);
+[
+  "talent_fire",
+  "talent_earth",
+  "talent_water",
+  "talent_air",
+  "talent_void"
+].forEach(id => {
+  document.getElementById(id).addEventListener("input", updateAll);
+});
+
+[
+  "res_fire",
+  "res_earth",
+  "res_water",
+  "res_air"
+].forEach(id => {
+  document.getElementById(id).addEventListener("input", updateAll);
+});
+
+[
+  "res_fire",
+  "res_earth",
+  "res_water",
+  "res_air"
+].forEach(id => {
+  document.getElementById(id).addEventListener("input", updateAll);
+});
+
+function updateAllCategoryStatuses() {
+  updateCategoryStatus("body", "talent_body", "bodyStatus");
+  updateCategoryStatus("int", "talent_intellect", "intStatus");
+  updateCategoryStatus("soc", "talent_social", "socStatus");
+  updateCategoryStatus("surv", "talent_survival", "survStatus");
+  updateCategoryStatus("craft", "talent_craft", "craftStatus");
+}
+
+// 🔥 DAS IST DER WICHTIGSTE FIX
+document.getElementById("sel_Klasse").addEventListener("change", () => {
+
+  // 1. Talente resetten
+  const all = [
+    "talent_fire",
+    "talent_earth",
+    "talent_water",
+    "talent_air",
+    "talent_void"
+  ];
+
+  all.forEach(id => {
+    const el = document.getElementById(id);
+    el.value = 0;
+  });
+
+  // 2. UI neu setzen (wichtig: zuerst availability!)
+  updateTalentAvailability();
+
+  // 3. danach alles berechnen
+  updateAll();
+});
+
+document.getElementById("sel_Klasse").addEventListener("change", () => {
+
+  const all = [
+    "talent_fire","talent_earth","talent_water","talent_air","talent_void",
+    "res_fire","res_earth","res_water","res_air"
+  ];
+
+  all.forEach(id => {
+    const el = document.getElementById(id);
+    el.value = 0;
+  });
+
+  updateTalentAvailability();
+  updateResistanceAvailability(); // <- neu
+  updateAll();
+});
+
+document.getElementById("sel_Beruf").addEventListener("change", () => {
+
+  // nur Talente neu berechnen, KEIN Reset!
+  updateAll();
+});
+
+// ================= WÜRFEL =================
+function rollDice(){
+  let r=[]; for(let i=0;i<5;i++) r.push(Math.ceil(Math.random()*6));
+  r.sort((a,b)=>a-b);
+  let t=r.slice(1,4);
+  let s=Math.max(6,t.reduce((a,b)=>a+b,0));
+  document.getElementById("diceResult").innerText=`🎲 ${r} → ${t} → ${s}`;
+}
+
+function updateIcons() {
+  const race = sel("sel_Volk");
+  const klass = sel("sel_Klasse");
+
+  const raceEl = config.elementsByRace[race] || [];
+  const classEl = config.elementsByClass[klass] || [];
+
+  const raceBox = document.getElementById("icons_Volk");
+  const classBox = document.getElementById("icons_Klasse");
+  const status = document.getElementById("status");
+
+  // ❗ Wenn keine Klasse gewählt → nur Volk anzeigen
+  if (!klass) {
+raceBox.innerHTML = raceEl.map(e=>`<span style="margin-right:5px;">${e}</span>`).join("");
+classBox.innerHTML = classEl.map(e=>`<span style="margin-right:5px;">${e}</span>`).join("");
+    status.innerHTML = "";
+    return;
+  }
+
+  // Volk (mit durchstreichen wenn nicht kompatibel)
+  raceBox.innerHTML = raceEl.map(e => {
+    return classEl.includes(e)
+      ? e
+      : `<span style="text-decoration:line-through;opacity:0.4">${e}</span>`;
+  }).join(" ");
+
+  // Klasse
+  classBox.innerHTML = classEl.join(" ");
+
+  // ✔ / ❌
+  const match = classEl.every(e => raceEl.includes(e));
+
+  status.innerHTML = match
+    ? `<span style="color:green;">✔</span>`
+    : `<span style="color:red;">❌</span>`;
+}
+
+function updateTalentAvailability() {
+
+  const klass = sel("sel_Klasse");
+  const classElements = config.elementsByClass[klass] || [];
+
+  const all = [
+    "talent_fire",
+    "talent_earth",
+    "talent_water",
+    "talent_air",
+    "talent_void"
+  ];
+
+  // alles sperren
+  all.forEach(id => {
+    const el = document.getElementById(id);
+    el.disabled = true;
+    el.style.opacity = 0.5;
+  });
+
+  // erlaubte freischalten
+  classElements.forEach(symbol => {
+    const id = config.elementToTalent[symbol];
+    if (id) {
+      const el = document.getElementById(id);
+      el.disabled = false;
+      el.style.opacity = 1;
+    }
+  });
+
+
+}
+
+function updateResistanceAvailability() {
+
+  const klass = sel("sel_Klasse");
+  const classElements = config.elementsByClass[klass] || [];
+
+  const map = {
+    "🔥": "res_fire",
+    "🪨": "res_earth",
+    "💧": "res_water",
+    "🌪️": "res_air"
+  };
+
+  const all = Object.values(map);
+
+  // erst alles sperren
+  all.forEach(id => {
+    const el = document.getElementById(id);
+    el.disabled = true;
+    el.style.opacity = 0.5;
+  });
+
+  // freischalten
+  classElements.forEach(symbol => {
+    const id = map[symbol];
+    if (id) {
+      const el = document.getElementById(id);
+      el.disabled = false;
+      el.style.opacity = 1;
+    }
+  });
+
+  // Spezialregel Nihilar
+  if (klass === "Nihilar") {
+    all.forEach(id => {
+      const el = document.getElementById(id);
+      el.disabled = false;
+      el.style.opacity = 1;
+    });
+  }
+}
+
+// 🔥 SPECIAL RULE: Nihilar / Leere darf alles nutzen, aber nur wenn Klasse es hat
+if (klass === "Nihilar") {
+  all.forEach(id => {
+    const el = document.getElementById(id);
+    el.disabled = false;
+    el.style.opacity = 1;
+  });
+}
+
+function updateCombatSpirit() {
+  const gabe = gift();
+
+  const off = val("offensive");
+  const def = val("defensive");
+
+  const sum = off + def;
+
+  const status = document.getElementById("combatStatus");
+
+  if (sum > gabe) {
+    status.innerHTML = "❌";
+  }
+  else if (sum === gabe) {
+    status.innerHTML = "✔";
+  }
+  else {
+    status.innerHTML = "❓";
+  }
+}
+
+function exportPDF() {
+  const originalTitle = document.title;
+
+  document.title = "Charakterbogen";
+
+  window.print();
+
+  setTimeout(() => {
+    document.title = originalTitle;
+  }, 1000);
+}
+
+</script>
+</body>
+</html>
